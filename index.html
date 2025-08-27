@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <main class="todo-app">
+        <header class="header">
+            <h1 class="header__title" data-i18n-key="headerTitle">Mis Tareas ✔️</h1>
+            <div class="header__actions">
+                <button class="header__button" id="open-settings-btn" aria-label="Abrir configuración">
+                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.44,0.17-0.48,0.41L9.2,5.77C8.61,6.01,8.08,6.33,7.58,6.71L5.19,5.75C4.97,5.68,4.72,5.75,4.6,5.97L2.68,9.29 c-0.11,0.2-0.06,0.47,0.12,0.61l2.03,1.58C4.78,11.7,4.76,12,4.76,12.3c0,0.3,0.02,0.6,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.04,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.48-0.41l0.36-2.54c0.59-0.24,1.12-0.56,1.62-0.94l2.39,0.96 c0.22,0.07,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                </button>
+                <button class="header__button" id="open-help-btn" aria-label="Ayuda">
+                    <svg viewBox="0 0 24 24"><path d="M10,19H14V17H10M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,6A4,4 0 0,0 8,10H10A2,2 0 0,1 12,8A2,2 0 0,1 14,10C14,12 11,11.75 11,15H13C13,12.75 16,12.5 16,10A4,4 0 0,0 12,6Z"/></svg>
+                </button>
+                <button class="header__button" id="open-about-btn" aria-label="Acerca de">
+                    <svg viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"/></svg>
+                </button>
+                <button class="header__button" id="open-export-btn" aria-label="Exportar y Compartir">
+                    <svg viewBox="0 0 24 24"><path d="M21,12L14,5V9C7,10 4,15 3,20C5.5,16.5 9,14.9 14,14.9V19L21,12Z" /></svg>
+                </button>
+                <button class="header__button" id="open-bin-btn" aria-label="Abrir papelera de reciclaje">
+                    <svg viewBox="0 0 24 24"><path d="M9,3V4H4V6H5V19C5,20.1 5.9,21 7,21H17C18.1,21 19,20.1 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z"/></svg>
+                    <span class="notification-badge" id="bin-badge"></span>
+                </button>
+            </div>
+        </header>
+
+        <section class="dashboard">
+            <div class="task-stats">
+                <div class="stat-item"><span class="stat-item__count" id="pending-count">0</span><p class="stat-item__label" data-i18n-key="dashboardPending">Pendientes</p></div>
+                <div class="stat-item"><span class="stat-item__count" id="completed-count">0</span><p class="stat-item__label" data-i18n-key="dashboardCompleted">Completadas</p></div>
+            </div>
+            <div class="chart-container"><canvas id="progress-chart"></canvas></div>
+        </section>
+
+        <section class="planner-controls">
+            <div class="week-navigation">
+                <button class="week-nav-btn" id="prev-week-btn" aria-label="Semana anterior">&lt;</button>
+                <h3 id="current-week-display"></h3>
+                <button class="week-nav-btn" id="next-week-btn" aria-label="Siguiente semana">&gt;</button>
+            </div>
+            <div class="day-selector" id="day-selector"></div>
+        </section>
+        
+        <form class="task-form">
+            <input type="text" id="task-form-input" class="task-form__input" placeholder="Añadir tarea para el día seleccionado..." data-i18n-key="formInputPlaceholder" required>
+            <button type="submit" class="task-form__button" data-i18n-key="formButton">Añadir</button>
+        </form>
+        
+        <section class="controls-bar">
+             <div class="filter-controls" id="filter-controls">
+                <button class="filter-btn active" data-filter="all" data-i18n-key="filterAll">
+                    Todas <span class="filter-badge" id="all-badge"></span>
+                </button>
+                <button class="filter-btn" data-filter="priority" data-i18n-key="filterPriority">
+                    Prioridades <span class="filter-badge" id="priority-badge"></span>
+                </button>
+                <button class="filter-btn" data-filter="completed" data-i18n-key="filterCompleted">
+                    Completadas <span class="filter-badge" id="completed-badge"></span>
+                </button>
+            </div>
+            <div class="search-sort-controls">
+                <input type="search" id="search-input" class="search-input" placeholder="Buscar en este día..." data-i18n-key="searchInputPlaceholder">
+                <select id="sort-select" class="sort-select" aria-label="Ordenar tareas">
+                    <option value="creationDate" data-i18n-key="sortCreation">Por Creación</option>
+                    <option value="priority" data-i18n-key="sortPriority">Por Prioridad</option>
+                    <option value="alphabetical" data-i18n-key="sortAlphabetical">Alfabéticamente (A-Z)</option>
+                    <option value="status" data-i18n-key="sortStatus">Por Estado</option>
+                </select>
+            </div>
+        </section>
+
+        <div class="task-list-container">
+            <h2 class="current-date-header" id="current-date-header"></h2>
+            <ul class="task-list" id="task-list"></ul>
+        </div>
+    </main>
+    
+    <div class="modal-overlay" id="settings-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="settingsTitle">Configuración</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body">
+                <div class="settings-section">
+                    <h3 class="export-title" data-i18n-key="settingsAppearance">Apariencia</h3>
+                    <div class="setting-item">
+                        <span data-i18n-key="settingsTheme">Tema</span>
+                        <div class="theme-switcher">
+                            <input type="checkbox" id="theme-toggle" class="theme-switcher__toggle">
+                            <label for="theme-toggle" class="theme-switcher__label">
+                                <span class="theme-switcher__icon--sun">☀️</span>
+                                <span class="theme-switcher__icon--moon">🌙</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span data-i18n-key="settingsLanguage">Idioma</span>
+                        <select id="language-select" class="sort-select">
+                            <option value="es">Español</option>
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3 class="export-title" data-i18n-key="settingsAccentColor">Color de Acento</h3>
+                    <div class="color-palette" id="color-palette"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="help-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="helpTitle">Manual de Usuario</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body manual-content" data-i18n-key="helpContent">
+                </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="about-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="aboutTitle">Acerca de la Aplicación</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body about-content" data-i18n-key="aboutContent">
+                <h3>Lista de Tareas Pro</h3>
+                <p><strong>Versión:</strong> 2.1.0</p>
+                <p><strong>Autor:</strong> Juan Daniel Pedraza Díaz</p>
+                <hr>
+                <p>Este proyecto fue desarrollado con un fin curricular para demostrar y aplicar habilidades avanzadas en las tecnologías fundamentales de la web: HTML5, CSS3 y JavaScript (Puro/Vanilla).</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="export-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="exportTitle">Exportar y Compartir</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body">
+                <div class="export-section">
+                    <h3 class="export-title" data-i18n-key="exportDownloadTitle">Descargar Lista Actual</h3>
+                    <p class="export-subtitle" data-i18n-key="exportDownloadSubtitle">Se exportarán las tareas visibles para el día seleccionado.</p>
+                    <div class="export-buttons">
+                        <button class="export-btn" data-export="txt">TXT</button>
+                        <button class="export-btn" data-export="csv">CSV (Excel)</button>
+                        <button class="export-btn" data-export="pdf">PDF</button>
+                    </div>
+                </div>
+                <div class="export-section">
+                    <h3 class="export-title" data-i18n-key="exportShareTitle">Compartir Lista</h3>
+                    <div class="export-buttons">
+                        <button class="export-btn" data-share="native" data-i18n-key="exportShareNative">Compartir...</button>
+                        <button class="export-btn" data-share="whatsapp">WhatsApp</button>
+                        <button class="export-btn" data-share="telegram">Telegram</button>
+                        <button class="export-btn" data-share="copy" data-i18n-key="exportShareCopy">Copiar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="duedate-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="dueDateTitle">Establecer Fecha de Vencimiento</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body">
+                <input type="date" id="duedate-input" class="duedate-input" aria-label="Fecha de vencimiento">
+            </div>
+            <footer class="modal__footer" style="justify-content: flex-end; display: flex; gap: 10px;">
+                <button class="modal__action-btn modal__action-btn--secondary" id="remove-duedate-btn" data-i18n-key="dueDateRemove">Quitar Fecha</button>
+                <button class="modal__action-btn" id="save-duedate-btn" data-i18n-key="save">Guardar</button>
+            </footer>
+        </div>
+    </div>
+    <div class="modal-overlay" id="priority-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="priorityTitle">Asignar Prioridad</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body">
+                <div class="priority-options">
+                    <button class="priority-option" data-priority="urgent"><span class="priority-indicator urgent"></span> <span data-i18n-key="priorityUrgent">Urgente</span></button>
+                    <button class="priority-option" data-priority="important"><span class="priority-indicator important"></span> <span data-i18n-key="priorityImportant">Importante</span></button>
+                    <button class="priority-option" data-priority="normal"><span class="priority-indicator normal"></span> <span data-i18n-key="priorityNormal">Normal</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="bin-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="binTitle">Papelera de Reciclaje</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body">
+                <ul class="bin-list" id="bin-list"></ul>
+            </div>
+            <footer class="modal__footer">
+                <button class="modal__action-btn" id="empty-bin-btn" data-i18n-key="binEmpty">Vaciar Papelera</button>
+            </footer>
+        </div>
+    </div>
+    <div class="modal-overlay" id="properties-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" data-i18n-key="propertiesTitle">Propiedades de la Papelera</h2>
+                <button class="modal__close-btn" data-close>&times;</button>
+            </header>
+            <div class="modal__body">
+                <ul class="properties-list">
+                    <li><strong data-i18n-key="propertiesItems">Elementos:</strong> <span id="prop-item-count"></span></li>
+                    <li><strong data-i18n-key="propertiesOldest">Elemento más antiguo:</strong> <span id="prop-oldest-item"></span></li>
+                    <li><strong data-i18n-key="propertiesNewest">Elemento más reciente:</strong> <span id="prop-newest-item"></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="confirm-modal-overlay">
+        <div class="modal">
+            <header class="modal__header">
+                <h2 class="modal__title" id="confirm-modal-title">Confirmar Acción</h2>
+            </header>
+            <div class="modal__body">
+                <p id="confirm-modal-text">¿Estás seguro?</p>
+            </div>
+            <footer class="modal__footer" style="justify-content: flex-end; display: flex; gap: 10px;">
+                <button class="modal__action-btn modal__action-btn--secondary" id="confirm-cancel-btn" data-i18n-key="cancel">Cancelar</button>
+                <button class="modal__action-btn" id="confirm-accept-btn" data-i18n-key="confirm">Confirmar</button>
+            </footer>
+        </div>
+    </div>
+    <div class="context-menu" id="bin-context-menu">
+        <ul class="context-menu__list">
+            <li class="context-menu__item" data-action="restore-all" data-i18n-key="binRestoreAll">Restaurar Todo</li>
+            <li class="context-menu__item" data-action="empty" data-i18n-key="binEmpty">Vaciar Papelera</li>
+            <li class="context-menu__item" data-action="properties" data-i18n-key="properties">Propiedades</li>
+        </ul>
+    </div>
+    <script src="./assets/js/app.js" type="module" defer></script>
+</body>
+</html>
