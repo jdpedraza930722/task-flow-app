@@ -1,0 +1,1091 @@
+/* ---- VARIABLES DE TEMA ---- */
+:root {
+    /* Colores base para modo claro */
+    --color-bg: #f4f7f9;
+    --color-surface: #ffffff;
+    --color-surface-secondary: #f8f9fa;
+    --color-text: #333333;
+    --color-text-light: #888888;
+    --color-border: #e0e0e0;
+    --color-shadow: rgba(0, 0, 0, 0.08);
+
+    /* Colores de estado y acento */
+    --color-completed: #2ecc71;
+    --color-pending: #f39c12;
+    --color-danger: #e74c3c;
+    --color-overdue: #d63031;
+    --color-urgent: #e74c3c;
+    --color-important: #f39c12;
+
+    /* Variables HSL para el color primario dinámico */
+    --primary-hue: 210;         /* Azul por defecto */
+    --primary-saturation: 79%;
+    --primary-lightness: 61%;
+
+    /* Colores primarios generados a partir de HSL */
+    --color-primary: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+    --color-primary-dark: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) - 10%));
+
+    /* Estilos generales */
+    --font-family: 'Inter', sans-serif;
+    --border-radius: 12px;
+}
+
+/* ---- VARIABLES PARA MODO OSCURO ---- */
+body.dark-mode {
+    --color-bg: #121212;
+    --color-surface: #1e1e1e;
+    --color-surface-secondary: #2a2a2a;
+    --color-text: #e0e0e0;
+    --color-text-light: #a0a0a0;
+    --color-border: #3a3a3a;
+    --color-shadow: rgba(0, 0, 0, 0.25);
+
+    --color-urgent: #ff6b6b;
+    --color-important: #feca57;
+    --color-overdue: #ff7675;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 30px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---- LAYOUT PRINCIPAL ---- */
+.todo-app {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--color-surface);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px var(--color-shadow);
+    transition: background-color 0.3s ease;
+}
+
+/* ---- CABECERA Y ACCIONES ---- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.header__title {
+    font-weight: 700;
+    font-size: 2rem;
+    flex-shrink: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-primary);
+}
+
+.header__actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.header__button {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.header__button svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--color-text-light);
+}
+
+.header__button:hover {
+    background-color: var(--color-border);
+}
+
+/* ---- PLANIFICADOR SEMANAL ---- */
+.planner-controls {
+    margin-bottom: 25px;
+    background-color: var(--color-surface-secondary);
+    border-radius: var(--border-radius);
+    padding: 15px;
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#current-week-display {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.week-nav-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--color-text-light);
+    transition: all 0.2s ease;
+}
+
+.week-nav-btn:hover {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+.day-selector {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.day-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border: none;
+    background-color: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: 2px solid transparent;
+    color: var(--color-text); 
+}
+
+.day-btn:hover {
+    background-color: var(--color-border);
+}
+
+.day-btn.active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.day-btn.today {
+    border-color: var(--color-primary);
+}
+
+.day-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+.day-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.day-btn.active .day-name, .day-btn.active .day-number {
+    color: white;
+}
+
+.current-date-header {
+    font-size: 1.25rem;
+    margin-bottom: 15px;
+    color: var(--color-text);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* ---- NOTIFICACIÓN DE PAPELERA ---- */
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: var(--color-danger);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+    border: 2px solid var(--color-surface);
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.notification-badge.visible {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* ---- INTERRUPTOR DE TEMA (Dentro de modal)---- */
+.theme-switcher {
+    position: relative;
+}
+
+.theme-switcher__toggle {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-switcher__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 60px;
+    height: 30px;
+    background-color: var(--color-border);
+    border-radius: 30px;
+    padding: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.theme-switcher__label::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.theme-switcher__toggle:checked+.theme-switcher__label::after {
+    transform: translateX(30px);
+}
+
+.theme-switcher__icon--sun,
+.theme-switcher__icon--moon {
+    font-size: 16px;
+}
+
+/* ---- DASHBOARD ---- */
+.dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    background-color: var(--color-surface-secondary);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
+}
+
+.task-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-item__count {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+#pending-count {
+    color: var(--color-pending);
+}
+
+#completed-count {
+    color: var(--color-completed);
+}
+
+.stat-item__label {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+}
+
+.chart-container {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+}
+
+/* ---- FORMULARIO ---- */
+.task-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.task-form__input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    transition: all 0.3s ease;
+}
+
+.task-form__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.task-form__button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.task-form__button:hover {
+    background-color: var(--color-primary-dark);
+}
+
+/* ---- BARRA DE CONTROLES ---- */
+.controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 5px;
+    background-color: var(--color-surface-secondary);
+    padding: 5px;
+    border-radius: var(--border-radius);
+    flex-shrink: 0;
+    /* --- MEJORA RESPONSIVE --- */
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--color-text-light);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Estilos para los contadores de los filtros */
+.filter-badge {
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    border-radius: 8px;
+    padding: 2px 6px;
+    line-height: 1;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.filter-badge.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+#all-badge { background-color: var(--color-primary-dark); }
+#priority-badge { background-color: var(--color-important); }
+#completed-badge { background-color: var(--color-completed); }
+
+.search-sort-controls {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.search-input {
+    width: 100%;
+}
+
+.search-input,
+.sort-select {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+}
+
+.search-input:focus,
+.sort-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* ---- LISTA DE TAREAS Y ANIMACIONES ---- */
+.task-list-container {
+    margin-top: 15px;
+    position: relative;
+    min-height: 50px;
+}
+
+.task-list {
+    list-style: none;
+    padding: 0;
+}
+
+.task-list__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.2s ease, border-left-color 0.3s ease;
+    border-left: 4px solid transparent;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-item--new {
+    animation: fadeInDown 0.3s ease-out forwards;
+}
+
+.task-list__item--urgent {
+    border-left-color: var(--color-urgent);
+    background-color: color-mix(in srgb, var(--color-urgent) 8%, var(--color-surface));
+}
+
+.task-list__item--important {
+    border-left-color: var(--color-important);
+    background-color: color-mix(in srgb, var(--color-important) 8%, var(--color-surface));
+}
+
+.task-list__item:hover {
+    background-color: color-mix(in srgb, var(--color-border) 50%, var(--color-surface));
+}
+
+.task-list__checkbox {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-completed);
+    flex-shrink: 0;
+}
+
+.task-list__label {
+    flex-grow: 1;
+    cursor: pointer;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+    word-break: break-word;
+}
+
+.task-list__item.completed .task-list__label {
+    text-decoration: line-through;
+    color: var(--color-text-light);
+}
+
+.task-duedate {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    background-color: var(--color-surface-secondary);
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-duedate.overdue {
+    color: var(--color-overdue);
+    font-weight: 500;
+}
+
+.task-list__edit-input {
+    display: none;
+}
+
+.task-list__item.editing .task-list__edit-input {
+    display: block;
+    flex-grow: 1;
+}
+
+.task-list__item.editing .task-list__label,
+.task-list__item.editing .task-list__checkbox,
+.task-list__item.editing .task-duedate {
+    display: none;
+}
+
+.task-list__edit-input {
+    font-size: 1rem;
+    padding: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-family: var(--font-family);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.task-list__edit-input:focus {
+    outline: 1px solid var(--color-primary);
+}
+
+.task-list__actions {
+    display: flex;
+    flex-shrink: 0;
+}
+
+.task-list__button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.task-list__button svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-text-light);
+    transition: fill 0.2s ease;
+    pointer-events: none;
+}
+
+.task-list__button.task-list__duedate-button:hover {
+    background-color: color-mix(in srgb, var(--color-completed) 15%, transparent);
+}
+
+.task-list__button.task-list__duedate-button:hover svg {
+    fill: var(--color-completed);
+}
+
+.task-list__button.task-list__priority-button:hover {
+    background-color: color-mix(in srgb, var(--color-important) 15%, transparent);
+}
+
+.task-list__button.task-list__priority-button:hover svg {
+    fill: var(--color-important);
+}
+
+.task-list__button.task-list__edit-button:hover {
+    background-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.task-list__button.task-list__edit-button:hover svg {
+    fill: var(--color-primary);
+}
+
+.task-list__button.task-list__delete-button:hover {
+    background-color: color-mix(in srgb, var(--color-danger) 15%, transparent);
+}
+
+.task-list__button.task-list__delete-button:hover svg {
+    fill: var(--color-danger);
+}
+
+/* ---- ESTILOS DE MODALES ---- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.visible .modal {
+    transform: scale(1);
+}
+
+.modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal__title {
+    font-size: 1.25rem;
+}
+
+.modal__close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--color-text-light);
+    line-height: 1;
+}
+
+.modal__body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal__footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--color-border);
+    text-align: right;
+}
+
+.modal__action-btn {
+    background-color: var(--color-danger);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.modal__action-btn:hover {
+    background-color: color-mix(in srgb, var(--color-danger) 80%, black);
+}
+
+.modal__action-btn:disabled {
+    background-color: var(--color-text-light);
+    cursor: not-allowed;
+}
+
+.modal__action-btn--secondary {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+.modal__action-btn--secondary:hover {
+    background-color: color-mix(in srgb, var(--color-border) 80%, black);
+}
+
+/* ---- Listas en Modales, Exportación, Menú Contextual, etc. ---- */
+.bin-list,
+.properties-list {
+    list-style: none;
+    padding: 0;
+}
+
+.bin-list__item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.bin-list__item:last-child {
+    border-bottom: none;
+}
+
+.bin-list__text {
+    flex-grow: 1;
+    color: var(--color-text-light);
+    text-decoration: line-through;
+    word-break: break-word;
+}
+
+.bin-list__restore-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.bin-list__restore-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--color-completed);
+    pointer-events: none;
+}
+
+.bin-list__restore-btn:hover {
+    background-color: color-mix(in srgb, var(--color-completed) 15%, transparent);
+}
+
+.properties-list {
+    line-height: 1.8;
+}
+
+.properties-list strong {
+    color: var(--color-text);
+}
+
+.properties-list span {
+    color: var(--color-text-light);
+}
+
+.priority-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.priority-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: transparent;
+    color: var(--color-text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.priority-option:hover {
+    background-color: var(--color-surface-secondary);
+}
+
+.priority-indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+}
+
+.priority-indicator.urgent {
+    background-color: var(--color-urgent);
+}
+
+.priority-indicator.important {
+    background-color: var(--color-important);
+}
+
+.priority-indicator.normal {
+    background-color: var(--color-text-light);
+}
+
+.duedate-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.context-menu {
+    position: absolute;
+    z-index: 2000;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--color-shadow);
+    padding: 5px;
+    display: none;
+}
+
+.context-menu__list {
+    list-style: none;
+}
+
+.context-menu__item {
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.context-menu__item:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.export-section, .settings-section {
+    margin-bottom: 25px;
+}
+
+.export-section:last-child, .settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.export-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: var(--color-text);
+}
+
+.export-subtitle {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    margin-bottom: 15px;
+}
+
+.export-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.export-btn {
+    flex-grow: 1;
+    background-color: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+}
+
+.export-btn:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.export-btn:active {
+    transform: scale(0.97);
+}
+
+/* ---- Estilos de Configuración y Personalización ---- */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.color-swatch {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--color-border);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    position: relative;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.active {
+    border-color: var(--color-primary);
+}
+
+.color-swatch.active::after {
+    content: '✔';
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* ---- Contenido de modales de ayuda y acerca de ---- */
+.manual-content h3,
+.about-content h3 {
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.manual-content h3:first-child,
+.about-content h3:first-child {
+    margin-top: 0;
+}
+
+.manual-content p,
+.about-content p {
+    line-height: 1.6;
+    color: var(--color-text-light);
+    margin-bottom: 10px;
+}
+
+.manual-content ul,
+.about-content ul {
+    line-height: 1.6;
+    color: var(--color-text-light);
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.manual-content ul li::marker,
+.about-content ul li::marker {
+    color: var(--color-primary);
+}
+
+.about-content hr {
+    border: none;
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 15px 0;
+}
+
+.about-content strong {
+    color: var(--color-text);
+}
+
+/*
+==============================================
+ESTILOS RESPONSIVOS
+==============================================
+*/
+
+@media (max-width: 620px) {
+    body { padding: 15px; }
+    .todo-app { padding: 20px; }
+    .header, .controls-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+    .header__actions, .search-sort-controls { width: 100%; justify-content: center; }
+    .search-sort-controls { flex-grow: 0; }
+    .day-name { font-size: 0.65rem; }
+    .day-number { font-size: 1rem; }
+}
+
+@media(max-width: 480px) {
+    body { padding: 10px; align-items: flex-start; }
+    .todo-app { padding: 15px; }
+    .header__title { font-size: 1.6rem; text-align: center; width: 100%; }
+    .header__actions { gap: 2px; flex-wrap: wrap; }
+    .header__button { flex-grow: 1; }
+    .dashboard { flex-direction: column; align-items: center; }
+    .task-list__actions { gap: 0; }
+    .task-list__button { width: 30px; height: 30px; }
+    .task-duedate { display: none; }
+    .task-form { flex-direction: column; }
+    .search-sort-controls { flex-direction: column; }
+    .day-selector { gap: 2px; }
+    
+    /* --- MEJORAS RESPONSIVE --- */
+    .day-btn {
+        padding: 6px 2px;
+        gap: 2px;
+    }
+    .day-name {
+        font-size: 0.6rem;
+    }
+    .day-number {
+        font-size: 1rem;
+    }
+}
+
+@media(max-width: 450px) {
+    #filter-controls{
+        flex-direction: column;
+        justify-content: center;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+}
