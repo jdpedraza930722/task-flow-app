@@ -1,33 +1,66 @@
 // assets/js/app.js
-import { translations } from './modules/i18n.js';
 import { dom } from './modules/dom.js';
 import { state, loadData, saveData, setTimeToZero, parseDateString, formatDateToYYYYMMDD, getFilteredAndSortedTasks } from './modules/state.js';
-import { renderAll, renderBinnedTasks, applyTheme, applyAccentColor, setLanguage, showConfirmModal, closeConfirmModal, setupPersonalization } from './modules/ui.js';
+import { renderAll, renderBinnedTasks, applyTheme, applyAccentColor, applyTranslations, showConfirmModal, closeConfirmModal, setupPersonalization } from './modules/ui.js';
 
 /**
  * Main controller for the application.
  */
-function main() {
+async function main() {
     
-    // --- LÓGICA DE EXPORTACIÓN Y COMPARTIR ---
+    /**
+     * Fetches a language JSON file, updates the state, and applies the translations.
+     * @param {string} lang - The language code (e.g., 'es', 'en').
+     */
+    async function loadAndSetLanguage(lang) {
+        try {
+            const response = await fetch(`./assets/js/modules/i18n/${lang}.json`);
+            if (!response.ok) {
+                throw new Error(`Could not load ${lang}.json`);
+            }
+            state.translations = await response.json();
+            state.currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            applyTranslations();
+        } catch (error) {
+            console.error("Failed to load language file:", error);
+            // Fallback to English if the selected language fails
+            if (lang !== 'en') {
+                await loadAndSetLanguage('en');
+            }
+        }
+    }
 
+    // --- LÓGICA DE NAVEGACIÓN DE PÁGINAS ---
+    function showPage(pageKey) {
+        dom.mainApp.style.display = 'none';
+        dom.pagesContainer.style.display = 'block';
+        dom.pageTitle.setAttribute('data-i18n-key', `pageTitle${pageKey.charAt(0).toUpperCase() + pageKey.slice(1)}`);
+        dom.pageContent.innerHTML = state.translations[`${pageKey}Content`];
+        dom.pageTitle.textContent = state.translations[`pageTitle${pageKey.charAt(0).toUpperCase() + pageKey.slice(1)}`];
+    }
+
+    function showMainApp() {
+        dom.pagesContainer.style.display = 'none';
+        dom.mainApp.style.display = 'block';
+    }
+
+    // --- LÓGICA DE EXPORTACIÓN Y COMPARTIR ---
     function generateTaskListText(format = 'plain') {
         const tasksToExport = getFilteredAndSortedTasks();
-        const title = `${translations[state.currentLanguage].headerTitle} (${state.selectedDate.toLocaleDateString(state.currentLanguage)})`;
+        const title = `${state.translations.headerTitle} (${state.selectedDate.toLocaleDateString(state.currentLanguage)})`;
         if (tasksToExport.length === 0) return "No hay tareas para exportar.";
-        
         if (format === 'csv') {
             let csvContent = "Estado;Tarea;Prioridad;Fecha de Vencimiento\n";
             tasksToExport.forEach(task => {
                 const status = task.completed ? 'Completada' : 'Pendiente';
                 const priorityKey = `priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`;
-                const priority = translations[state.currentLanguage][priorityKey] || 'Normal';
+                const priority = state.translations[priorityKey] || 'Normal';
                 const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString(state.currentLanguage) : 'N/A';
                 csvContent += `"${status}";"${task.text}";"${priority}";"${dueDate}"\n`;
             });
             return csvContent;
         }
-
         let plainText = title + "\n---------------------\n";
         tasksToExport.forEach(task => {
             const status = task.completed ? '[x]' : '[ ]';
@@ -35,7 +68,6 @@ function main() {
         });
         return plainText;
     }
-
     function downloadFile(filename, content, mimeType) {
         const blob = new Blob([content], { type: mimeType });
         const url = URL.createObjectURL(blob);
@@ -47,19 +79,16 @@ function main() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
-    
     function downloadPdf() {
         try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const tasksToExport = getFilteredAndSortedTasks();
-            const title = `${translations[state.currentLanguage].headerTitle} (${state.selectedDate.toLocaleDateString(state.currentLanguage)})`;
-            
+            const title = `${state.translations.headerTitle} (${state.selectedDate.toLocaleDateString(state.currentLanguage)})`;
             doc.setFontSize(18);
             doc.text(title, 14, 22);
             doc.setFontSize(11);
             let y = 30;
-            
             tasksToExport.forEach(task => {
                 if (y > 280) { doc.addPage(); y = 20; }
                 const status = task.completed ? '✓' : 'o';
@@ -74,14 +103,12 @@ function main() {
             alert("Error al generar el PDF. Asegúrate de que la librería jsPDF está cargada.");
         }
     }
-    
     async function shareList(platform) {
         const textToShare = generateTaskListText();
         const encodedText = encodeURIComponent(textToShare);
-        
         if (platform === 'native' && navigator.share) {
             try {
-                await navigator.share({ title: translations[state.currentLanguage].headerTitle, text: textToShare });
+                await navigator.share({ title: state.translations.headerTitle, text: textToShare });
             } catch (err) { console.error("Error al compartir:", err); }
         } else if (platform === 'whatsapp') {
             window.open(`https://wa.me/?text=${encodedText}`, '_blank');
@@ -95,9 +122,6 @@ function main() {
         }
     }
 
-    /**
-     * Handles adding a new task.
-     */
     function addTask(text) {
         const newTask = {
             id: Date.now(),
@@ -116,11 +140,20 @@ function main() {
         }
     }
 
-    /**
-     * Sets up all event listeners for the application.
-     */
     function addEventListeners() {
-        // Navigation
+        dom.footer.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (e.target.matches('.footer-link')) {
+                const pageKey = e.target.dataset.page;
+                showPage(pageKey);
+            }
+        });
+        dom.pagesContainer.addEventListener('click', (e) => {
+            if (e.target.matches('.page-back-btn')) {
+                showMainApp();
+            }
+        });
+
         dom.prevWeekBtn.addEventListener('click', () => { state.selectedDate.setDate(state.selectedDate.getDate() - 7); renderAll(); });
         dom.nextWeekBtn.addEventListener('click', () => { state.selectedDate.setDate(state.selectedDate.getDate() + 7); renderAll(); });
         dom.daySelector.addEventListener('click', (e) => {
@@ -131,7 +164,6 @@ function main() {
             }
         });
 
-        // Task Form
         dom.taskForm.addEventListener('submit', event => {
             event.preventDefault();
             const text = dom.taskInput.value.trim();
@@ -141,7 +173,6 @@ function main() {
             }
         });
 
-        // Filtering, Sorting, Searching
         dom.filterControls.addEventListener('click', e => {
             if (e.target.matches('.filter-btn')) {
                 dom.filterControls.querySelector('.active').classList.remove('active');
@@ -153,12 +184,10 @@ function main() {
         dom.searchInput.addEventListener('input', e => { state.searchTerm = e.target.value; renderAll(); });
         dom.sortSelect.addEventListener('change', e => { state.currentSort = e.target.value; renderAll(); });
 
-        // Task List Actions
         dom.taskList.addEventListener('click', event => {
             const item = event.target.closest('.task-list__item');
             if (!item) return;
             const id = Number(item.dataset.id);
-
             if (event.target.closest('.task-list__delete-button')) {
                 showConfirmModal('binTitle', 'taskDeletedConfirmation', () => {
                     const taskIndex = state.tasks.findIndex(t => t.id === id);
@@ -191,7 +220,6 @@ function main() {
             }
         });
 
-        // Save Task Edit
         const saveTaskEdit = (input) => {
             const item = input.closest('.task-list__item');
             if (!item) return;
@@ -210,7 +238,6 @@ function main() {
         dom.taskList.addEventListener('blur', e => { if (e.target.matches('.task-list__edit-input')) saveTaskEdit(e.target); }, true);
         dom.taskList.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('.task-list__edit-input')) e.target.blur(); });
 
-        // Modals
         dom.priorityOptions.addEventListener('click', (event) => {
             const priority = event.target.closest('.priority-option')?.dataset.priority;
             if (priority && state.taskToModifyId) {
@@ -245,15 +272,18 @@ function main() {
         dom.confirmAcceptBtn.addEventListener('click', () => { if (state.onConfirmCallback) state.onConfirmCallback(); closeConfirmModal(); });
         dom.confirmCancelBtn.addEventListener('click', closeConfirmModal);
 
-        // Bin Actions & Context Menu
         dom.openBinBtn.addEventListener('click', () => { renderBinnedTasks(); dom.binModalOverlay.classList.add('visible'); });
         dom.openBinBtn.addEventListener('contextmenu', (event) => {
             event.preventDefault();
+            const isEmpty = state.binnedTasks.length === 0;
+            dom.binContextMenuRestore.classList.toggle('disabled', isEmpty);
+            dom.binContextMenuEmpty.classList.toggle('disabled', isEmpty);
             dom.binContextMenu.style.top = `${event.pageY}px`;
             dom.binContextMenu.style.left = `${event.pageX}px`;
             dom.binContextMenu.style.display = 'block';
         });
         dom.binContextMenu.addEventListener('click', (event) => {
+            if (event.target.classList.contains('disabled')) return;
             const action = event.target.dataset.action;
             dom.binContextMenu.style.display = 'none';
             if (action === 'empty' && state.binnedTasks.length > 0) {
@@ -308,10 +338,9 @@ function main() {
             }
         });
 
-        // Settings & Personalization
         dom.themeToggle.addEventListener('change', () => applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark'));
         dom.openSettingsBtn.addEventListener('click', () => dom.settingsModalOverlay.classList.add('visible'));
-        dom.languageSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+        dom.languageSelect.addEventListener('change', (e) => loadAndSetLanguage(e.target.value));
         dom.colorPalette.addEventListener('click', (e) => {
             if (e.target.classList.contains('color-swatch')) {
                 const color = { h: e.target.dataset.hue, s: e.target.dataset.saturation, l: e.target.dataset.lightness };
@@ -319,7 +348,6 @@ function main() {
             }
         });
 
-        // Header Buttons & Export Modal
         dom.openHelpBtn.addEventListener('click', () => dom.helpModalOverlay.classList.add('visible'));
         dom.openAboutBtn.addEventListener('click', () => dom.aboutModalOverlay.classList.add('visible'));
         dom.openExportBtn.addEventListener('click', () => dom.exportModalOverlay.classList.add('visible'));
@@ -328,18 +356,14 @@ function main() {
             if (e.target.matches('.export-btn')) {
                 const exportType = e.target.dataset.export;
                 const shareType = e.target.dataset.share;
-                
                 if (exportType === 'txt') downloadFile('tareas.txt', generateTaskListText(), 'text/plain;charset=utf-8');
                 else if (exportType === 'csv') downloadFile('tareas.csv', generateTaskListText('csv'), 'text/csv;charset=utf-8');
                 else if (exportType === 'pdf') downloadPdf();
-    
                 if (shareType) shareList(shareType);
-    
                 dom.exportModalOverlay.classList.remove('visible');
             }
         });
 
-        // General: Close modals and context menu
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#open-bin-btn')) {
                 dom.binContextMenu.style.display = 'none';
@@ -353,11 +377,15 @@ function main() {
     /**
      * Initializes the application.
      */
-    function init() {
+    async function init() {
         state.selectedDate = setTimeToZero(new Date());
         loadData();
         
-        const savedLang = localStorage.getItem('language') || navigator.language.split('-')[0] || 'en';
+        const validLangs = ['es', 'en', 'fr'];
+        let savedLang = localStorage.getItem('language') || navigator.language.split('-')[0];
+        if (!validLangs.includes(savedLang)) {
+            savedLang = 'en'; // Fallback to English
+        }
         
         setupPersonalization();
         
@@ -370,7 +398,7 @@ function main() {
         
         addEventListeners();
         
-        setLanguage(translations[savedLang] ? savedLang : 'en');
+        await loadAndSetLanguage(savedLang);
     }
 
     init();

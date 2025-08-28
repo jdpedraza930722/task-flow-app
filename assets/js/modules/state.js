@@ -8,6 +8,7 @@ export const state = {
     binnedTasks: [],
     selectedDate: new Date(),
     currentLanguage: 'es',
+    translations: {}, // Will store the currently loaded language file
     currentFilter: 'all',
     currentSort: 'creationDate',
     searchTerm: '',

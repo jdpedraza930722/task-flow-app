@@ -1,6 +1,5 @@
 // assets/js/modules/ui.js
 import { dom, icons } from './dom.js';
-import { translations } from './i18n.js';
 import { state, getStartOfWeek, isSameDay, setTimeToZero, formatDateToYYYYMMDD, getFilteredAndSortedTasks } from './state.js';
 
 /**
@@ -141,8 +140,8 @@ function updateFilterBadges() {
 }
 
 export function showConfirmModal(titleKey, textKey, callback) {
-    dom.confirmModalTitle.textContent = translations[state.currentLanguage][titleKey] || titleKey;
-    dom.confirmModalText.textContent = translations[state.currentLanguage][textKey] || textKey;
+    dom.confirmModalTitle.textContent = state.translations[titleKey] || titleKey;
+    dom.confirmModalText.textContent = state.translations[textKey] || textKey;
     state.onConfirmCallback = callback;
     dom.confirmModalOverlay.classList.add('visible');
 }
@@ -152,14 +151,15 @@ export function closeConfirmModal() {
     state.onConfirmCallback = null;
 }
 
-export function setLanguage(lang) {
-    state.currentLanguage = lang;
-    localStorage.setItem('language', lang);
-    document.documentElement.lang = lang;
-    dom.languageSelect.value = lang;
+/**
+ * Applies the currently loaded translations from the state to the DOM.
+ */
+export function applyTranslations() {
+    document.documentElement.lang = state.currentLanguage;
+    dom.languageSelect.value = state.currentLanguage;
     document.querySelectorAll('[data-i18n-key]').forEach(el => {
         const key = el.dataset.i18nKey;
-        const translation = translations[lang][key];
+        const translation = state.translations[key];
         if (translation) {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = translation;
