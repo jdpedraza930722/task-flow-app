@@ -61,7 +61,7 @@ body {
     align-items: flex-start;
     min-height: 100vh;
     padding: 30px;
-    padding-bottom: 100px; /* <-- AÑADIDO: Espacio para el footer */
+    padding-bottom: 100px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -1050,8 +1050,14 @@ ESTILOS RESPONSIVOS
 */
 
 @media (max-width: 620px) {
-    body { padding: 15px; padding-bottom: 100px; }
-    .todo-app { padding: 20px; }
+    body { 
+        padding: 15px 2vw; /* <-- MODIFICADO */
+        padding-bottom: 100px; 
+    }
+    .todo-app { 
+        padding: 20px; 
+        width: 96vw; /* <-- AÑADIDO */
+    }
     .header, .controls-bar { flex-direction: column; align-items: stretch; gap: 10px; }
     .header__actions, .search-sort-controls { width: 100%; justify-content: center; }
     .search-sort-controls { flex-grow: 0; }
@@ -1060,8 +1066,15 @@ ESTILOS RESPONSIVOS
 }
 
 @media(max-width: 480px) {
-    body { padding: 10px; padding-bottom: 100px; align-items: flex-start; }
-    .todo-app { padding: 15px; }
+    body { 
+        padding: 10px 2vw; /* <-- MODIFICADO */
+        padding-bottom: 100px; 
+        align-items: flex-start; 
+    }
+    .todo-app { 
+        padding: 15px; 
+        width: 96vw; /* <-- AÑADIDO */
+    }
     .header__title { font-size: 1.6rem; text-align: center; width: 100%; }
     .header__actions { gap: 2px; flex-wrap: wrap; }
     .header__button { flex-grow: 1; }
@@ -1089,7 +1102,7 @@ ESTILOS RESPONSIVOS
 
 /*
 ==============================================
-ESTILOS PARA ADSENSE Y PÁGINAS
+NUEVOS ESTILOS PARA ADSENSE Y PÁGINAS
 ==============================================
 */
 
